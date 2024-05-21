@@ -1,20 +1,21 @@
 package tsp.commands.command.bukkit;
 
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import tsp.commands.command.AbstractCommand;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * @author TheSilentPro (Silent)
  */
 public abstract class AbstractBukkitCommand
         extends AbstractCommand<CommandSender, JavaPlugin, BukkitCommandContext<CommandSender>>
-        implements BukkitCommand<JavaPlugin>, CommandExecutor, TabCompleter
+        implements BukkitCommand
 {
 
     public AbstractBukkitCommand(String permission, String permissionMessage, String name, String... aliases) {
@@ -34,20 +35,24 @@ public abstract class AbstractBukkitCommand
     }
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        handle(new BukkitCommandContext<>(commandSender, strings));
+    public boolean onCommand(@Nonnull CommandSender commandSender, @Nonnull Command command, @Nonnull String s, @Nonnull String[] strings) {
+        handle(new BukkitCommandContext<>(commandSender, strings, this));
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return onTab(new BukkitCommandContext<>(commandSender, strings));
+    public List<String> onTabComplete(@Nonnull CommandSender commandSender, @Nonnull Command command, @Nonnull String s, @Nonnull String[] strings) {
+        return onTab(new BukkitCommandContext<>(commandSender, strings, this));
     }
 
     @Override
     public void register(JavaPlugin plugin) {
-        //noinspection DataFlowIssue
-        plugin.getCommand(getName()).setExecutor(this);
+        PluginCommand pluginCommand = plugin.getCommand(getName());
+        if (pluginCommand == null) {
+            throw new NoSuchElementException("Command '" + getName() + "' is not registered in the plugin.yml!");
+        }
+
+        pluginCommand.setExecutor(this);
     }
 
 }

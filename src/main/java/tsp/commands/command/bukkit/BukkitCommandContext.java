@@ -4,7 +4,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.Player;
+import tsp.commands.command.Cmd;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -12,30 +14,47 @@ import javax.annotation.Nullable;
  */
 public class BukkitCommandContext<T extends CommandSender> implements MinecraftCommandContext<T> {
 
+    @Nonnull
     private final T sender;
+    @Nonnull
     private final String[] arguments;
+    @Nonnull
+    private final Cmd<T, ?, ?> command;
 
-    public BukkitCommandContext(T sender, String[] arguments) {
+    public BukkitCommandContext(@Nonnull T sender, @Nonnull String[] arguments, @Nonnull Cmd<T, ?, ?> command) {
         this.sender = sender;
         this.arguments = arguments;
+        this.command = command;
     }
 
+    @Nonnull
     @Override
     public T sender() {
         return sender;
     }
 
+    @Nonnull
     @Override
     public String[] rawArgs() {
         return arguments;
     }
 
+    @Nonnull
     @Override
-    public boolean checkPermission(String permission, @Nullable String permissionMessage) {
-        if (sender.hasPermission(permission)) {
+    public Cmd<T, ?, ?> command() {
+        return command;
+    }
+
+    @Override
+    public boolean checkPermission(@Nullable String permissionMessage) {
+        if (command().getPermission().isEmpty()) {
+            return true;
+        }
+
+        if (sender.hasPermission(command().getPermission().get())) {
             return true;
         } else {
-            if (permissionMessage != null) sender.sendMessage(permissionMessage);
+            command().getPermissionMessage().ifPresent(sender::sendMessage);
             return false;
         }
     }
@@ -68,13 +87,12 @@ public class BukkitCommandContext<T extends CommandSender> implements MinecraftC
         }
     }
 
-    public BukkitCommandContext<T> assertOp(@Nullable String message) {
-        isOp(message);
-        return this;
-    }
-
     public BukkitCommandContext<T> assertOp() {
-        return assertOp(null);
+        if (isOp(null)) {
+            return this;
+        } else {
+            return new EmptyBukkitCommandContext<>();
+        }
     }
 
     @Override

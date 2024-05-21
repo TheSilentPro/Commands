@@ -11,31 +11,28 @@ import javax.annotation.Nullable;
  */
 public interface MinecraftCommandContext<T> extends CommandContext<T> {
 
-    boolean checkPermission(String permission, @Nullable String permissionMessage);
+    @Override
+    default MinecraftCommandContext<T> assertion(boolean result) {
+        if (result) {
+            return this;
+        } else {
+            return new EmptyMinecraftCommandContext<>();
+        }
+    }
 
-    default boolean checkPermission(String permission) {
-        return checkPermission(permission, null);
+    boolean checkPermission(@Nullable String permission);
+
+    default boolean checkPermission() {
+        return checkPermission(null);
     }
 
     /**
      * Assert that the {@link #sender() sender} has a permission.
      *
-     * @param permission The permission.
-     * @param permissionMessage The permission message to send if they do not.
      * @return Context
      */
-    default CommandContext<T> assertPermission(String permission, @Nullable String permissionMessage) {
-        return assertion(checkPermission(permission, permissionMessage));
-    }
-
-    /**
-     * Assert that the {@link #sender() sender} has a permission.
-     *
-     * @param permission The permission.
-     * @return Context
-     */
-    default CommandContext<T> assertPermission(String permission) {
-        return assertPermission(permission, null);
+    default CommandContext<T> assertPermission() {
+        return assertion(checkPermission());
     }
 
     boolean isConsole(@Nullable String message);
@@ -50,7 +47,7 @@ public interface MinecraftCommandContext<T> extends CommandContext<T> {
      * @param message The message to send if it is not.
      * @return Context
      */
-    default CommandContext<T> assertConsole(@Nullable String message) {
+    default MinecraftCommandContext<T> assertConsole(@Nullable String message) {
         return assertion(isConsole(message));
     }
 
@@ -59,7 +56,7 @@ public interface MinecraftCommandContext<T> extends CommandContext<T> {
      *
      * @return Context
      */
-    default CommandContext<T> assertConsole() {
+    default MinecraftCommandContext<T> assertConsole() {
         return assertConsole(null);
     }
 
@@ -75,7 +72,7 @@ public interface MinecraftCommandContext<T> extends CommandContext<T> {
      * @param message The message to send if it is not.
      * @return Context
      */
-    default CommandContext<T> assertPlayer(@Nullable String message) {
+    default MinecraftCommandContext<T> assertPlayer(@Nullable String message) {
         return assertion(isPlayer(message));
     }
 
@@ -84,7 +81,7 @@ public interface MinecraftCommandContext<T> extends CommandContext<T> {
      *
      * @return Context
      */
-    default CommandContext<T> assertPlayer() {
+    default MinecraftCommandContext<T> assertPlayer() {
         return assertPlayer(null);
     }
 

@@ -1,5 +1,8 @@
 package tsp.commands.command.context;
 
+import tsp.commands.command.Cmd;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -11,7 +14,7 @@ import javax.annotation.Nullable;
  *
  * @author TheSilentPro (Silent)
  */
-public class EmptyCommandContext<T,A> implements CommandContext<T> {
+public class EmptyCommandContext<T> implements CommandContext<T> {
 
     private static final String[] EMPTY = new String[0];
 
@@ -21,9 +24,16 @@ public class EmptyCommandContext<T,A> implements CommandContext<T> {
         return null;
     }
 
+    @Nonnull
     @Override
     public String[] rawArgs() {
         return EMPTY;
+    }
+
+    @Nullable
+    @Override
+    public Cmd<T, ?, ?> command() {
+        return null;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package tsp.commands.command.util;
 
-import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -44,9 +43,10 @@ public class BiOptional<T, C> {
      * Returns an empty {@code BiOptional} instance.  No value, nor context, is present for this
      * {@code BiOptional}.
      *
-     * @return Completly empty.
+     * @return Completely empty.
      * @param <T> The type of the non-existent value
      * @param <C> The type of the non-existent context value
+     * @deprecated The point of this class is to have context, without it an {@link java.util.Optional} should suffice.
      */
     @Deprecated
     public static <T, C> BiOptional<T, C> empty() {
@@ -109,7 +109,11 @@ public class BiOptional<T, C> {
         return value;
     }
 
-    @Nullable
+    /**
+     * Returns the possibly null context.
+     *
+     * @return Possibly null context.
+     */
     public C getContext() {
         return context;
     }
@@ -134,9 +138,15 @@ public class BiOptional<T, C> {
         return value == null;
     }
 
-    public C ifAbsent(Consumer<Void> action) {
+    /**
+     * If a value is absent, performs the given action with the context.
+     *
+     * @param action The action to be performed, if a value is absent.
+     * @return Context
+     */
+    public C ifAbsent(Consumer<C> action) {
         if (value == null) {
-            action.accept(null);
+            action.accept(context);
         }
         return context;
     }
